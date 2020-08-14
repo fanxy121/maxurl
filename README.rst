@@ -6,17 +6,17 @@
 
 Image Max URL is a program that will try to find larger/original versions of images, usually by replacing URL patterns.
 
-It currently contains support for >5000 hardcoded websites (full list in `sites.txt <https://github.com/qsniyg/maxurl/blob/master/sites.txt>`__),
+It currently contains support for >7000 hardcoded websites (full list in `sites.txt <https://github.com/qsniyg/maxurl/blob/master/sites.txt>`__),
 but it also supports a number of generic engines (such as Wordpress and MediaWiki), which means it can work for many other websites as well.
 
 It is currently released as:
 
-- `Userscript <https://greasyfork.org/en/scripts/36662-image-max-url>`__ (most browsers)
+- Userscript: `Greasyfork <https://greasyfork.org/scripts/36662-image-max-url>`__ | `OpenUserJS <https://openuserjs.org/scripts/qsniyg/Image_Max_URL>`__ (most browsers)
 
   - `userscript.user.js <https://github.com/qsniyg/maxurl/blob/master/userscript.user.js>`__ is also the base for everything listed below
   - It also serves as a node module (used by the reddit bot), and can be embedded in a website
 
-- Browser extension: `Firefox Quantum <https://addons.mozilla.org/en-US/firefox/addon/image-max-url/>`__ | `Opera <https://addons.opera.com/en/extensions/details/image-max-url/>`__ (other browsers supporting WebExtensions can sideload the extension through this git repository)
+- Browser extension: `Firefox Quantum <https://addons.mozilla.org/firefox/addon/image-max-url/>`__ | `Opera <https://addons.opera.com/en/extensions/details/image-max-url/>`__ (other browsers supporting WebExtensions can sideload the extension through this git repository)
 
   - Since addons have more privileges than userscripts, it has a bit of extra functionality over the userscript
   - Source code is in `manifest.json <https://github.com/qsniyg/maxurl/blob/master/manifest.json>`__ and the `extension <https://github.com/qsniyg/maxurl/tree/master/extension>`__ folder
@@ -28,13 +28,27 @@ It is currently released as:
 
 - Reddit bot (`/u/MaxImageBot <https://www.reddit.com/user/MaxImageBot/>`__)
 
-  - Source code is in `reddit-bot/bot.js <https://github.com/qsniyg/maxurl/blob/master/reddit-bot/bot.js>`__
+  - Source code is in `reddit-bot/comment-bot.js <https://github.com/qsniyg/maxurl/blob/master/reddit-bot/comment-bot.js>`__ and `reddit-bot/dourl.js <https://github.com/qsniyg/maxurl/blob/master/reddit-bot/dourl.js>`__
 
 Community:
 
 - `Discord Server <https://discord.gg/fH9Pf54>`__
 
 - `Subreddit <http://reddit.com/r/MaxImage>`__
+
+*************************
+Sideloading the extension
+*************************
+
+The extension is currently unavailable to other browsers' addon stores (such as Chrome and Microsoft Edge),
+but you can sideload this repository if you wish to use the extension instead of the userscript.
+
+- Download the repository however you wish (I'd recommend cloning it through git as it allows easier updating)
+
+- Go to chrome://extensions, make sure "Developer mode" is enabled, click "Load unpacked [extension]", and navigate to the maxurl repository
+
+You'll probably want to keep "Check for updates" enabled (it's enabled by default) as sideloaded extensions aren't automatically updated.
+Any new updates will be displayed at the top of the options page.
 
 *******************************
 Integrating IMU in your program
@@ -71,6 +85,9 @@ As mentioned above, userscript.user.js also functions as a node module.
       // You can access the excluded problems through maximage.default_options.exclude_problems
       // By setting it to [], no problems will be excluded.
       //exclude_problems: [],
+
+      // Whether or not to exclude videos
+      exclude_videos: false,
 
       // This will include a "history" of objects found through iterations.
       // Disabling this will only keep the objects found through the last successful iteration.
@@ -132,6 +149,9 @@ The result is a list of objects that contain properties that may be useful in us
       // The URL of the image
       url: null,
 
+      // Whether or not this URL is a video
+      video: false,
+
       // Whether it's expected that it will always work or not.
       //  Don't rely on this value if you don't have to
       always_ok: false,
@@ -173,6 +193,16 @@ The result is a list of objects that contain properties that may be useful in us
       // If "mask", this image is an overlayed mask
       bad: false,
 
+      // Same as above, but contains a list of objects, e.g.:
+      // [{
+      //    headers: {"Content-Length": "1000"},
+      //    status: 301
+      // }]
+      // If one of the objects matches the response, it's a bad image.
+      // You can use maximage.check_bad_if(bad_if, resp) to check.
+      //  (resp is expected to be an XHR-like object)
+      bad_if: [],
+
       // Whether or not this URL is a "fake" URL that was used internally (i.e. if true, don't use this)
       fake: false,
 
@@ -183,7 +213,10 @@ The result is a list of objects that contain properties that may be useful in us
       // Additional properties that could be useful
       extra: {
         // The original page where this image was hosted
-        page: null
+        page: null,
+
+        // The title/caption attached to the image
+        caption: null
       },
 
       // If set, this is a more descriptive filename for the image
@@ -215,7 +248,7 @@ please file an issue here.
 Translations
 ============
 
-Currently translations are stored inside the source code (userscript.user.js). I'm currently working on trying to separate this into a separate
+Currently translations are stored inside the source code (userscript.user.js). I'm planning to move this into a separate
 file in order to make this easier for translators, but for now:
 
 * All message strings are stored as a JS object as ``strings`` (search for ``var strings =`` in the source code, it's near the top)

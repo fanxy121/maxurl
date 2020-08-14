@@ -2,13 +2,14 @@
   "manifest_version": 2,
   "name": "Image Max URL",
   "author": "qsniyg",
-  "version": "0.11.6",
+  "version": "0.13.18",
 
   "description": "Finds larger or original versions of images",
 
   "background": {
     "scripts": [
-      "extension/background.js"
+      "extension/background.js",
+      "userscript.user.js"
     ],
     "persistent": true
   },
@@ -19,9 +20,16 @@
     }
   },
 
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "maxurl@qsniyg"
+    }
+  },
+
   "content_scripts": [
     {
-      "matches": ["*://*/*"],
+      "all_frames": true,
+      "matches": ["<all_urls>"],
       "js": ["userscript.user.js"]
     }
   ],
@@ -32,6 +40,7 @@
   },
 
   "browser_action": {
+    "browser_style": false,
     "default_popup": "extension/popup.html",
     "default_title": "Image Max URL",
     "default_icon": {
@@ -42,7 +51,8 @@
   },
 
   "options_ui": {
-    "page": "extension/options.html"
+    "page": "extension/options.html",
+    "open_in_tab": true
   },
 
   "options_page": "extension/options.html",
@@ -55,5 +65,11 @@
     "contextMenus",
 
     "<all_urls>"
+  ],
+
+  "optional_permissions": [
+    "history",
+    "notifications",
+    "downloads"
   ]
 }
